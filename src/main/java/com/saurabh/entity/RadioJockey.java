@@ -39,14 +39,14 @@ public class RadioJockey {
     @Column(name = "contact_email")
     private String contactEmail;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH,
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.REFRESH,
             CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST})
     @JoinColumn(name="station_id")
 //    @JsonIgnore
 //    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private  RadioStation worksAt;
 
-    @OneToMany(mappedBy = "hostedByid",fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
+    @OneToMany(mappedBy = "hostedByid",fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
 //    @JoinColumn(name = "program_Id")
     @JsonIgnore
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
