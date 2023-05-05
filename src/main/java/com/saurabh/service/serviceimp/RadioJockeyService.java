@@ -4,7 +4,9 @@ import com.saurabh.dto.RadioJockeyDto;
 import com.saurabh.entity.Program;
 import com.saurabh.entity.RadioJockey;
 import com.saurabh.entity.RadioStation;
+import com.saurabh.exception.ProgramNotFoundException;
 import com.saurabh.exception.RadioJockeyNotFoundException;
+import com.saurabh.exception.RadioStationNotFoundException;
 import com.saurabh.repository.ProgramRepository;
 import com.saurabh.repository.RadioJockeyRepository;
 import com.saurabh.repository.RadioStationRepository;
@@ -14,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.management.LockInfo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,37 +33,33 @@ public class RadioJockeyService implements RadioJockeyImplement {
 
     @Override
     public List<RadioJockeyDto> fetchAllRadioJockey() {
-         List<RadioJockey> radioJockeys=(List<RadioJockey>) radioJockeyRepository.findAll();
-        List<RadioJockeyDto> radioJockeyDtos=new ArrayList<>();
-         for(RadioJockey radioJockey:radioJockeys)
-         {
-             RadioJockeyDto radioJockeyDto=new RadioJockeyDto(radioJockey);
-             radioJockeyDtos.add(radioJockeyDto);
-         }
-         return radioJockeyDtos;
+        List<RadioJockey> radioJockeys = (List<RadioJockey>) radioJockeyRepository.findAll();
+        List<RadioJockeyDto> radioJockeyDtos = new ArrayList<>();
+        for (RadioJockey radioJockey : radioJockeys) {
+            RadioJockeyDto radioJockeyDto = new RadioJockeyDto(radioJockey);
+            radioJockeyDtos.add(radioJockeyDto);
+        }
+        return radioJockeyDtos;
     }
 
     @Override
     public RadioJockeyDto fetchRadioJockeybyId(Long jockeyId) {
         RadioJockey radioJockey = radioJockeyRepository.findById(jockeyId).get();
-        RadioJockeyDto radioJockeyDto=new RadioJockeyDto(radioJockey);
+        RadioJockeyDto radioJockeyDto = new RadioJockeyDto(radioJockey);
         if (radioJockey == null) {
-            throw new RadioJockeyNotFoundException("Given Id " + jockeyId + "there are not Radio Jockey are Available ");
+            throw new RadioJockeyNotFoundException("Given Id " + jockeyId + " does not correspond to an available  radio jockey");
         }
         return radioJockeyDto;
     }
 
     @Override
-    public void addNewRadioJockey(Long stationId, Long programId, RadioJockey radioJockey) {
+    public void addNewRadioJockey(Long stationId, RadioJockey radioJockey) {
         RadioStation radioStation = radioStationRepository.findById(stationId).get();
-        Program program=programRepository.findById(programId).get();
         if (radioStation == null) {
-            throw new RadioJockeyNotFoundException("Given Id " + stationId + "there are not Radio Station rare Available ");
-        } else if(program==null){
-            throw new RuntimeException("Given Id " + programId + "there are no Program Available ");
-        }
-        else{
-            radioJockey.setProgram(program);
+            throw new RadioJockeyNotFoundException("Given Id " + stationId + " does not correspond to an available radio station");
+        } else {
+//            radioJockey.setProgram(program)
+            radioJockey.setWorksAt(radioStation);
             radioStation.getRadioJockeys().add(radioJockey);
             radioStationRepository.save(radioStation);
 //            radioJockeyRepository.save(radioJockey)
@@ -71,18 +68,22 @@ public class RadioJockeyService implements RadioJockeyImplement {
 
     @Override
     @Transactional
-    public void updateRadioJockey(Long jockeyId, RadioJockey radioJockey) {
+    public void updateRadioJockey(Long stationId, Long jockeyId, RadioJockey radioJockey) {
+        RadioStation radioStation = radioStationRepository.findById(stationId).get();
         RadioJockey radioJockey1 = radioJockeyRepository.findById(jockeyId).get();
+        if (radioStation == null) {
+            throw new RadioStationNotFoundException("Given Id " + stationId + " does not correspond to an available radio station");
+        }
         if (radioJockey1 == null) {
-            throw new RadioJockeyNotFoundException("Given Id " + jockeyId + "there are not Radio Jockey are Available ");
+            throw new RadioJockeyNotFoundException("Given Id " + jockeyId + " does not correspond to an available  radio jockey");
         } else {
             radioJockey1.setName(radioJockey.getName());
             radioJockey1.setGender(radioJockey.getGender());
             radioJockey1.setContactEmail(radioJockey.getContactEmail());
             radioJockey1.setWorksAt(radioJockey.getWorksAt());
-            radioJockey1.setProgram(radioJockey.getProgram());
             radioJockey1.setContactPhone(radioJockey.getContactPhone());
             radioJockey1.setDateOfBirth(radioJockey.getDateOfBirth());
+            radioJockey1.setWorksAt(radioStation);
             radioJockeyRepository.save(radioJockey1);
         }
 
@@ -92,17 +93,18 @@ public class RadioJockeyService implements RadioJockeyImplement {
     public void deleteRadioJockeyt(Long jockeyId) {
         RadioJockey radioJockey1 = radioJockeyRepository.findById(jockeyId).get();
         if (radioJockey1 == null) {
-            throw new RadioJockeyNotFoundException("Given Id " + jockeyId + "there are not Radio Jockey are Available ");
+            throw new RadioJockeyNotFoundException("Given Id " + jockeyId + " does not correspond to an available  radio jockey");
         }
-        radioJockeyRepository.delete(radioJockey1);
+        radioJockeyRepository.deleteById(jockeyId);
     }
 
+    //Radio jockeys attached to  station
     @Override
     @Transactional
-    public List<RadioStation> fetchAllStationAttachedwithJockey(Long jockeyId) {
+    public RadioStation fetchAllStationAttachedwithJockey(Long jockeyId) {
         Optional<RadioJockey> radioJockey1 = radioJockeyRepository.findById(jockeyId);
         if (radioJockey1 == null) {
-            throw new RadioJockeyNotFoundException("Given Id " + jockeyId + "there are not Radio Jockey are Available ");
+            throw new RadioJockeyNotFoundException("Given Id " + jockeyId + " does not correspond to an available  radio jockey");
         } else {
             return radioJockeyRepository.findStationsByJockeyId(jockeyId);
         }
@@ -112,10 +114,10 @@ public class RadioJockeyService implements RadioJockeyImplement {
     public List<RadioStation> fetchAllProgramDetailsAttachedwithJockey(Long jockeyId) {
         Optional<RadioJockey> radioJockey1 = radioJockeyRepository.findById(jockeyId);
         if (radioJockey1 == null) {
-            throw new RadioJockeyNotFoundException("Given Id " + jockeyId + "there are not Radio Jockey are Available ");
+            throw new RadioJockeyNotFoundException("Given Id " + jockeyId + " does not correspond to an available  radio jockey");
         } else {
-            return radioJockeyRepository.findStationsByJockeyId(jockeyId)  ;
-
+//            return radioJockeyRepository.findStationsByJockeyId(jockeyId)  ;
+            return null;
         }
 
     }
@@ -124,7 +126,7 @@ public class RadioJockeyService implements RadioJockeyImplement {
     public List<RadioJockey> findRadioJockeysByProgramId(Long programId) {
         Program program = programRepository.findById(programId).get();
         if (program == null) {
-            throw new RuntimeException("Given Id " + programId + "there are no Program Available ");
+            throw new ProgramNotFoundException("Given Id " + programId + " does not correspond to an available  radio program");
         } else {
             return programRepository.findJockeysByProgramId(programId);
         }
@@ -134,19 +136,20 @@ public class RadioJockeyService implements RadioJockeyImplement {
     public List<RadioJockey> findJockeysByStationId(Long stationId) {
         RadioStation radioStation = radioStationRepository.findById(stationId).get();
         if (radioStation == null) {
-            throw new RuntimeException("Given Id " + stationId + "there are not Radio Station are Available ");
+            throw new RadioStationNotFoundException("Given Id " + stationId + " does not correspond to an available radio station");
         } else {
-           return radioJockeyRepository.findJockeysByStationId(stationId);
+            return radioJockeyRepository.findJockeysByStationId(stationId);
         }
     }
 
+    //   Programs attached to Radio jockeys
     @Override
-    public Program findProgramByJockeyId(Long jockeyId) {
+    public List<Program> findProgramByJockeyId(Long jockeyId) {
         Optional<RadioJockey> radioJockey1 = radioJockeyRepository.findById(jockeyId);
         if (radioJockey1 == null) {
-            throw new RadioJockeyNotFoundException("Given Id " + jockeyId + "there are not Radio Jockey are Available ");
+            throw new RadioJockeyNotFoundException("Given Id " + jockeyId + " does not correspond to an available radio  jockey");
         } else {
-            return radioJockeyRepository.findProgramByJockeyId(jockeyId);
+            return (List<Program>) radioJockeyRepository.findProgramByJockeyId(jockeyId);
         }
     }
 
@@ -154,9 +157,9 @@ public class RadioJockeyService implements RadioJockeyImplement {
     public RadioJockey getRadioJockeyProgramStationData(Long jockeyId) {
         Optional<RadioJockey> radioJockey1 = radioJockeyRepository.findById(jockeyId);
         if (radioJockey1 == null) {
-            throw new RadioJockeyNotFoundException("Given Id " + jockeyId + "there are not Radio Jockey are Available ");
+            throw new RadioJockeyNotFoundException("Given Id " + jockeyId + " does not correspond to an available radio  jockey");
         } else {
-            return radioJockeyRepository.findById(jockeyId).get()  ;
+            return radioJockeyRepository.findById(jockeyId).get();
         }
     }
 

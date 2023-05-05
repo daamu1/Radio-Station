@@ -27,14 +27,14 @@ public class RadioJockeyController {
         return radioJockeyService.fetchRadioJockeybyId(jokeyId);
     }
 
-    @PostMapping("{stationId}/programs/{programId}/radiojockeys")
-    public void addNewRadioJockey(@PathVariable Long stationId, @RequestBody RadioJockey radioJockey, @PathVariable Long programId) {
-        radioJockeyService.addNewRadioJockey(stationId, programId, radioJockey);
+    @PostMapping("{stationId}/radiojockeys")
+    public void addNewRadioJockey(@PathVariable Long stationId, @RequestBody RadioJockey radioJockey) {
+        radioJockeyService.addNewRadioJockey(stationId, radioJockey);
     }
 
-    @PutMapping("/radiojockeys/{jockeyId}")
-    public void updateRadioJockey(@PathVariable Long jockeyId, @RequestBody RadioJockey radioJockey) {
-        radioJockeyService.updateRadioJockey(jockeyId, radioJockey);
+    @PutMapping("{stationId}/radiojockeys/{jockeyId}")
+    public void updateRadioJockey(@PathVariable Long stationId, @PathVariable Long jockeyId, @RequestBody RadioJockey radioJockey) {
+        radioJockeyService.updateRadioJockey(stationId, jockeyId, radioJockey);
     }
 
     @DeleteMapping("/radiojockeys/{jockeyId}")
@@ -42,14 +42,16 @@ public class RadioJockeyController {
         radioJockeyService.deleteRadioJockeyt(jockeyId);
     }
 
+    //Radio jockeys attached to  station.
     @GetMapping("/radiojockeys/{jockeyId}/stations")
-    public List<RadioStation> fetchAllStationAttachedwithJockey(@PathVariable Long jockeyId) {
+    public RadioStation fetchAllStationAttachedwithJockey(@PathVariable Long jockeyId) {
         return radioJockeyService.fetchAllStationAttachedwithJockey(jockeyId);
     }
 
+    //   Programs attached to Radio jockeys
     @GetMapping("/radiojockeys/{jockeyId}/program")
-    public List<RadioStation> fetchAllProgramAttachedwithJockey(@PathVariable Long jockeyId) {
-        return radioJockeyService.fetchAllProgramDetailsAttachedwithJockey(jockeyId);
+    public List<Program> fetchAllProgramAttachedwithJockey(@PathVariable Long jockeyId) {
+        return radioJockeyService.findProgramByJockeyId(jockeyId);
     }
 
     @GetMapping("/programs/{programId}/radiojockeys")

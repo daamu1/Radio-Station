@@ -19,21 +19,19 @@ public interface RadioJockeyRepository extends CrudRepository<RadioJockey, Long>
     @Query("SELECT p.hostedByid FROM Program p WHERE p.id = :programId")
     List<RadioJockey> findRadioJockeysByProgramId(@Param("programId") Long programId);
 
+    //Radio jockeys attached to  station
     @Query("SELECT rj.worksAt FROM RadioJockey rj WHERE rj.id = :jockeyId")
-    List<RadioStation> findStationsByJockeyId(@Param("jockeyId") Long jockeyId);
+    RadioStation findStationsByJockeyId(@Param("jockeyId") Long jockeyId);
+
     @Query("SELECT rs.radioJockeys FROM RadioStation rs WHERE rs.id = :stationId")
     List<RadioJockey> findJockeysByStationId(@Param("stationId") Long stationId);
-    @Query(nativeQuery = true, value = "SELECT rj.*, p.*, rs.* "
-            + "FROM radio_jockeys rj "
-            + "INNER JOIN programs p ON rj.program_id = p.id "
-            + "INNER JOIN radio_stations rs ON p.radio_station_id = rs.id "
-            + "WHERE rj.id = :jockeyId")
+
+    @Query(nativeQuery = true, value = "SELECT rj.*, p.*, rs.* " + "FROM radio_jockeys rj " + "INNER JOIN programs p ON rj.program_id = p.id " + "INNER JOIN radio_stations rs ON p.radio_station_id = rs.id " + "WHERE rj.id = :jockeyId")
     List<Object[]> getRadioJockeyProgramStationData(@Param("jockeyId") Long radioJockeyId);
 
-    @Query(value = "SELECT p FROM Program p " +
-            "JOIN p.hostedByid j " +
-            "WHERE j.id = :jockeyId")
-    Program findProgramByJockeyId(@Param("jockeyId") Long jockeyId);
+    //   Program attached to Radio jockeys
+    @Query(value = "SELECT p FROM Program p " + "JOIN p.hostedByid j " + "WHERE j.id = :jockeyId")
+    List<Program> findProgramByJockeyId(@Param("jockeyId") Long jockeyId);
 
 
 }

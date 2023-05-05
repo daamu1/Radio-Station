@@ -2,10 +2,8 @@ package com.saurabh.controller;
 
 import com.saurabh.dto.AdvertisementDto;
 import com.saurabh.entity.Advertisement;
-import com.saurabh.entity.Program;
 import com.saurabh.service.serviceimp.AdvertisementService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,6 +39,7 @@ public class AdvertisementController {
         advertisementService.deleteAdvertisement(addId);
     }
 
+    //    which advertisement will be played in between of program and on which station
     @GetMapping("/advertisements/{advertisementId}/details")
     public Advertisement fetchAdvertisementAllDetailsbyId(@PathVariable Long advertisementId) {
         return advertisementService.fetchAdvertisementAllDetailsbyId(advertisementId);

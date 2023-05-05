@@ -1,11 +1,11 @@
 package com.saurabh.controller;
 
 import com.saurabh.dto.RadioStationDto;
-import com.saurabh.entity.Advertisement;
-import com.saurabh.entity.RadioJockey;
+import com.saurabh.entity.Program;
 import com.saurabh.entity.RadioStation;
 import com.saurabh.service.serviceimp.RadioStationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -15,7 +15,7 @@ import java.util.List;
 @RequestMapping("/api/v2")
 public class RadioStationController {
     @Autowired
-    private RadioStationService radioStationService;
+    private final RadioStationService radioStationService;
 
     public RadioStationController(RadioStationService radioStationService) {
         this.radioStationService = radioStationService;
@@ -50,10 +50,14 @@ public class RadioStationController {
     List<Object[]> findAllDetailsForStation(@PathVariable Long stationId) {
         return radioStationService.findAllDetailsForStation(stationId);
     }
+
     @GetMapping("/radiostation")
     List<Object[]> findProgramDetailsByDate(@RequestParam LocalDate programDate) {
         return radioStationService.findProgramDetailsByDate(programDate);
     }
-
-
+    //All details for station for the any date
+    @GetMapping("/radiostation/{stationId}/date/{date}")
+    public List<Program> getStationDetails(@PathVariable Long stationId, @PathVariable LocalDate date) {
+        return radioStationService.getStationDetails(stationId, date);
     }
+}

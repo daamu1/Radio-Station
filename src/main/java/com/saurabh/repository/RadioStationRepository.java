@@ -28,13 +28,9 @@ public interface RadioStationRepository extends CrudRepository<RadioStation,Long
             "WHERE s.station_id = :stationId", nativeQuery = true)
     @Transactional
     List<Object[]> findAllDetailsForStation(@Param("stationId") Long stationId);
-    @Query(value = "SELECT DISTINCT p.*, rj.*, ad.*, rs.* FROM programs p LEFT JOIN radio_jockeys rj ON p.id = rj.program_id LEFT JOIN advertisements ad ON p.id = ad.program_id LEFT JOIN radio_stations rs ON p.radio_station_id = rs.id WHERE p.program_date = :programDate", nativeQuery = true)
-//@Query(value = "SELECT DISTINCT p.id, p.name, rj.name, ad.advertiser_name, rs.name " +
-//        "FROM Program p " +
-//        "JOIN radio_jockeys rj ON p.id = rj.program_id " +
-//        "JOIN advertisements ad ON p.id = ad.program_id " +
-//        "JOIN radio_stations rs ON p.radio_station_id = rs.id " +
-//        "WHERE p.program_date = :programDate " +
-//        "GROUP BY p.id, p.name, rj.name, ad.advertiser_name, rs.name")
-    List<Object[]> findProgramDetailsByDate(@Param("programDate") LocalDate programDate);
+
+
+    @Query(nativeQuery = true, value = "SELECT r.name FROM radio_jockeys r LEFT JOIN  programs p ON p.jockey_id = r.id LEFT JOIN  advertisements a ON a.program_id = p.id WHERE p.radio_station_id = :stationId AND p.program_date = :date")
+    List<Object[]> getStationDetails(@Param("stationId") Long stationId, @Param("date") LocalDate date);
 }
+

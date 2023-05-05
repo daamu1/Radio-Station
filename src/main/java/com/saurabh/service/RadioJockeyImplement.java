@@ -11,14 +11,15 @@ import java.util.List;
 public interface RadioJockeyImplement {
     public List<RadioJockeyDto> fetchAllRadioJockey();
     public RadioJockeyDto fetchRadioJockeybyId(Long jockeyId);
-    public void addNewRadioJockey(Long stationId,Long programId,RadioJockey radioJockey);
-    public void updateRadioJockey(Long jockeyId,RadioJockey radioJockey);
+    public void addNewRadioJockey(Long stationId,RadioJockey radioJockey);
+    public void updateRadioJockey(Long stationId,Long jockeyId, RadioJockey radioJockey);
+
     public void deleteRadioJockeyt(Long jockeyId);
-    public List<RadioStation> fetchAllStationAttachedwithJockey(Long jockeyId);
+    public RadioStation fetchAllStationAttachedwithJockey(Long jockeyId);
     public List<RadioStation> fetchAllProgramDetailsAttachedwithJockey(Long jockeyId);
     List<RadioJockey> findRadioJockeysByProgramId(Long programId);
     List<RadioJockey> findJockeysByStationId(Long stationId);
-    Program findProgramByJockeyId(@Param("jockeyId") Long jockeyId);
+    List<Program>  findProgramByJockeyId( Long jockeyId);
 
    RadioJockey getRadioJockeyProgramStationData( Long jockeyId);
 

@@ -18,6 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@JsonIgnoreProperties({"lazyProperty"})
 public class Program {
 
     @Id
@@ -44,27 +45,22 @@ public class Program {
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
     @JoinColumn(name = "radio_station_id")
-//    @JsonIgnore
+    @JsonIgnore
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private RadioStation broadcastedOn;
 
-    @OneToMany(mappedBy = "program", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
-    @JsonIgnoreProperties("program")
-    @JsonIgnore
-    private List<RadioJockey> hostedByid;
-    @OneToMany(mappedBy = "playedDuring", fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH,
+    @ManyToOne( fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
+//    @JsonIgnore
+//    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+   @JoinColumn(name="jockey_id")
+    private RadioJockey hostedByid;
+    @OneToMany(mappedBy = "playedDuring", fetch = FetchType.EAGER, cascade = {CascadeType.REFRESH,
             CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST})
     @JsonIgnore
     private List<Advertisement> advertisements;
 
 
-    public void addJockey(RadioJockey radioJockey) {
-        if (hostedByid == null) {
-            hostedByid = new ArrayList<RadioJockey>();
-        }
-        hostedByid.add(radioJockey);
-        radioJockey.setProgram(this);
-    }
+
 
     public void addAdd(Advertisement advertisement) {
         if (advertisements == null) {

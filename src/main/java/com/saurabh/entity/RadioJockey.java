@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -16,6 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@JsonIgnoreProperties({"lazyProperty"})
 public class RadioJockey {
 
     @Id
@@ -37,17 +39,24 @@ public class RadioJockey {
     @Column(name = "contact_email")
     private String contactEmail;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH,
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH,
             CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST})
-    @JoinTable(name = "jockey_station", joinColumns = @JoinColumn(name = "radio_jockey_id"), inverseJoinColumns = @JoinColumn(name = "station_id"))
-    @JsonIgnore
-    private List<RadioStation> worksAt;
-
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
-    @JoinColumn(name = "program_Id")
+    @JoinColumn(name="station_id")
 //    @JsonIgnore
+//    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private  RadioStation worksAt;
+
+    @OneToMany(mappedBy = "hostedByid",fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
+//    @JoinColumn(name = "program_Id")
+    @JsonIgnore
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    private Program program;
+    private List<Program> programs;
 
-
+    public void addProgram(Program radioJockey) {
+        if (programs == null) {
+            programs = new ArrayList<Program>();
+        }
+        programs.add(radioJockey);
+        radioJockey.setHostedByid(this);
+    }
 }

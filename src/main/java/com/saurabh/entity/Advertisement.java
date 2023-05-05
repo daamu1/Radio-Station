@@ -1,5 +1,6 @@
 package com.saurabh.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,6 +13,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler"})
 public class Advertisement {
 
     @Id
@@ -32,7 +34,6 @@ public class Advertisement {
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.REFRESH,
             CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST})
     @JoinColumn(name = "program_id")
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Program playedDuring;
 
 }

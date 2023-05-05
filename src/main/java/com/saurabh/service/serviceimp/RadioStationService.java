@@ -1,17 +1,14 @@
 package com.saurabh.service.serviceimp;
 
-import com.saurabh.RadioStationApiApplication;
-import com.saurabh.dto.ProgramDto;
 import com.saurabh.dto.RadioStationDto;
 import com.saurabh.entity.Program;
 import com.saurabh.entity.RadioStation;
-
+import com.saurabh.exception.RadioStationNotFoundException;
+import com.saurabh.repository.ProgramRepository;
 import com.saurabh.repository.RadioStationRepository;
 import com.saurabh.service.RadioStationImplement;
 import lombok.NoArgsConstructor;
-import org.aspectj.weaver.NewConstructorTypeMunger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +21,8 @@ import java.util.List;
 public class RadioStationService implements RadioStationImplement {
     @Autowired
     private RadioStationRepository radioStationRepository;
+    @Autowired
+    private ProgramRepository programRepository;
 
     public RadioStationService(RadioStationRepository radioStationRepository) {
         this.radioStationRepository = radioStationRepository;
@@ -31,7 +30,7 @@ public class RadioStationService implements RadioStationImplement {
 
     @Override
     public List<RadioStationDto> fetchAllRadioStation() {
-  List<RadioStation>radioStations= (List<RadioStation>) radioStationRepository.findAll();
+        List<RadioStation> radioStations = (List<RadioStation>) radioStationRepository.findAll();
         List<RadioStationDto> radioStationDtos = new ArrayList<>();
         for (RadioStation radioStation : radioStations) {
             RadioStationDto radioStationDto = new RadioStationDto(radioStation);
@@ -43,15 +42,14 @@ public class RadioStationService implements RadioStationImplement {
     @Override
     public RadioStationDto fetchRadioStationbyId(Long stationId) {
         RadioStation radioStation = radioStationRepository.findById(stationId).get();
-        RadioStationDto dto=new RadioStationDto(radioStation);
+        RadioStationDto dto = new RadioStationDto(radioStation);
         if (radioStation == null) {
-            throw new RuntimeException("Given Id " + stationId + "there are not Radio Station are Available ");
+            throw new RadioStationNotFoundException("Given Id " + stationId + " does not correspond to an available radio station");
         }
         return dto;
     }
 
     @Override
-    @Transactional
     public void addNewRadioStation(RadioStation radioStation) {
         radioStationRepository.save(radioStation);
     }
@@ -61,8 +59,9 @@ public class RadioStationService implements RadioStationImplement {
     public void updateRadioStation(Long stationId, RadioStation radioStatio) {
         RadioStation radioStation = radioStationRepository.findById(stationId).get();
         if (radioStation == null) {
-            throw new RuntimeException("Given Id " + stationId + "there are not Radio Station are Available ");
+            throw new RadioStationNotFoundException("Given Id " + stationId + " does not correspond to an available radio station");
         } else {
+            radioStation.setName(radioStatio.getName());
             radioStation.setCity(radioStatio.getCity());
             radioStation.setGenre(radioStatio.getGenre());
             radioStation.setFrequency(radioStatio.getFrequency());
@@ -80,7 +79,7 @@ public class RadioStationService implements RadioStationImplement {
     public void deleteRadioStation(Long stationId) {
         RadioStation radioStation = radioStationRepository.findById(stationId).get();
         if (radioStation == null) {
-            throw new RuntimeException("Given Id " + stationId + "there are not Radio Station are Available ");
+            throw new RadioStationNotFoundException("Given Id " + stationId + " does not correspond to an available radio station");
         } else {
             radioStationRepository.delete(radioStation);
         }
@@ -89,10 +88,11 @@ public class RadioStationService implements RadioStationImplement {
     public List<Object[]> findAllDetailsForStation(Long stationId) {
         RadioStation radioStation = radioStationRepository.findById(stationId).get();
         if (radioStation == null) {
-            throw new RuntimeException("Given Id " + stationId + "there are not Radio Station are Available ");
+            throw new RadioStationNotFoundException("Given Id " + stationId + " does not correspond to an available radio station");
         }
-       return radioStationRepository.findAllDetailsForStation(stationId);
+        return radioStationRepository.findAllDetailsForStation(stationId);
     }
+
     @Override
     @Transactional
     public List<Object[]> findProgramDetailsByDate(LocalDate programDate) {
@@ -102,6 +102,16 @@ public class RadioStationService implements RadioStationImplement {
 //        }
 //        return radioStationRepository.findProgramDetailsByDate(programDate);
         return null;
+    }
+
+    //All details for station for the any date
+    @Override
+    public List<Program> getStationDetails(Long stationId, LocalDate date) {
+        RadioStation radioStation = radioStationRepository.findById(stationId).get();
+        if (radioStation == null) {
+            throw new RadioStationNotFoundException("Given Id " + stationId + " does not correspond to an available radio station");
+        }
+        return programRepository.findByplayDateAndBroadcastedOn(date, radioStation);
     }
 
 }

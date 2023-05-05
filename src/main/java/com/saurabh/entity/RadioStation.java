@@ -18,6 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@JsonIgnoreProperties({"lazyProperty"})
 public class RadioStation {
 
     @Id
@@ -29,9 +30,6 @@ public class RadioStation {
 
     @Column(name = "frequency")
     private String frequency;
-
-//    @Column(name = "play_date")
-//    private LocalDate playDate;
 
     @Column(name = "city")
     private String city;
@@ -49,15 +47,13 @@ public class RadioStation {
     private String genre;
 
     @OneToMany(mappedBy = "broadcastedOn", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
-//    @JoinColumn(name = "host_by_id")
     @JsonIgnore
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private List<Program> programs;
-    @ManyToMany(fetch = FetchType.EAGER,cascade = {CascadeType.REFRESH,
+    @OneToMany(mappedBy = "worksAt",fetch = FetchType.EAGER,cascade = {CascadeType.REFRESH,
             CascadeType.DETACH,CascadeType.MERGE,CascadeType.PERSIST})
-    @JoinTable(name = "jockey_station", joinColumns = @JoinColumn(name = "station_id"), inverseJoinColumns = @JoinColumn(name = "radio_jockey_id"))
-    @JsonIgnore
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @JsonIgnore
     private List<RadioJockey> radioJockeys;
 
     public void addProgram(Program program) {
@@ -66,6 +62,13 @@ public class RadioStation {
         }
         programs.add(program);
        program.setBroadcastedOn(this);
+    }
+    public void addRadioJockey(RadioJockey program) {
+        if (programs == null) {
+            radioJockeys = new ArrayList<RadioJockey>();
+        }
+        radioJockeys.add(program);
+        program.setWorksAt(this);
     }
 
 }
