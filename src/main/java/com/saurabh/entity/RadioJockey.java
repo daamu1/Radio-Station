@@ -1,61 +1,61 @@
-package com.saurabh.entity;
+    package com.saurabh.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
-import lombok.*;
+    import com.fasterxml.jackson.annotation.JsonBackReference;
+    import com.fasterxml.jackson.annotation.JsonIgnore;
+    import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+    import jakarta.persistence.*;
+    import lombok.*;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+    import java.time.LocalDate;
+    import java.util.ArrayList;
+    import java.util.List;
 
-@Entity
-@Table(name = "radio_jockeys")
-//@Data
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-//@ToString
-@JsonIgnoreProperties({"lazyProperty"})
-public class RadioJockey {
+    @Entity
+    @Table(name = "radio_jockeys")
+    //@Data
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    //@ToString
+    @JsonIgnoreProperties({"lazyProperty"})
+    public class RadioJockey {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
 
-    @Column(name = "name")
-    private String name;
+        @Column(name = "name")
+        private String name;
 
-    @Column(name = "date_of_birth")
-    private LocalDate dateOfBirth;
+        @Column(name = "date_of_birth")
+        private LocalDate dateOfBirth;
 
-    @Column(name = "gender")
-    private String gender;
+        @Column(name = "gender")
+        private String gender;
 
-    @Column(name = "contact_phone")
-    private String contactPhone;
+        @Column(name = "contact_phone")
+        private String contactPhone;
 
-    @Column(name = "contact_email")
-    private String contactEmail;
+        @Column(name = "contact_email")
+        private String contactEmail;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.REFRESH, CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST})
-    @JoinColumn(name = "station_id")
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-//    @JsonIgnore
-    private RadioStation worksAt;
+        @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.REFRESH, CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST})
+        @JoinColumn(name = "station_id")
+        @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    //    @JsonIgnore
+        private RadioStation worksAt;
 
-    @OneToMany(mappedBy = "hostedByid", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JsonIgnore
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    private List<Program> programs;
+        @OneToMany(mappedBy = "hostedByid", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+        @JsonIgnore
+        @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+        private List<Program> programs;
 
-    public void addProgram(Program radioJockey) {
-        if (programs == null) {
-            programs = new ArrayList<Program>();
+        public void addProgram(Program radioJockey) {
+            if (programs == null) {
+                programs = new ArrayList<Program>();
+            }
+            programs.add(radioJockey);
+            radioJockey.setHostedByid(this);
         }
-        programs.add(radioJockey);
-        radioJockey.setHostedByid(this);
     }
-}

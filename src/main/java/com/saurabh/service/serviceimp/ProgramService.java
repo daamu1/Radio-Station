@@ -1,6 +1,7 @@
 package com.saurabh.service.serviceimp;
 
 import com.saurabh.dto.ProgramDto;
+import com.saurabh.entity.Advertisement;
 import com.saurabh.entity.Program;
 import com.saurabh.entity.RadioJockey;
 import com.saurabh.entity.RadioStation;
@@ -11,8 +12,11 @@ import com.saurabh.repository.ProgramRepository;
 import com.saurabh.repository.RadioJockeyRepository;
 import com.saurabh.repository.RadioStationRepository;
 import com.saurabh.service.ProgrameImplement;
+import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -22,6 +26,8 @@ import java.util.Optional;
 
 @Service
 public class ProgramService implements ProgrameImplement {
+    @Autowired
+    private EntityManager entityManager;
     @Autowired
     private ProgramRepository programRepository;
     @Autowired
@@ -89,6 +95,8 @@ public class ProgramService implements ProgrameImplement {
     }
 
     @Override
+    @Transactional
+    @Modifying
     public void deleteProgram(Long stationId, Long jockeyId, Long programId) {
         Program program = programRepository.findById(programId).orElseThrow(() -> new ProgramNotFoundException("Given Id " + programId + " does not correspond to an available radio program"));
         RadioStation radioStation = radioStationRepository.findById(stationId).orElseThrow(() -> new RadioStationNotFoundException("Given Id " + stationId + " does not correspond to an available radio station"));
@@ -96,13 +104,15 @@ public class ProgramService implements ProgrameImplement {
         if (!radioJockey.getWorksAt().equals(radioStation)) {
             throw new RuntimeException("Radio jockey with Id " + jockeyId + " does not work at radio station with Id " + stationId);
         }
-        try {
-            programRepository.delete(program);
-        } catch (ProgramNotFoundException e) {
-            throw new ProgramNotFoundException("Given Id " + programId + " does not correspond to an available radio program");
-        } catch (Exception e) {
-            throw new RuntimeException("An error occurred while deleting the program", e);
-        }
+        program.setHostedByid(null);
+        program.setBroadcastedOn(null);
+            List<Advertisement> advertisements = program.getAdvertisements();
+            for (Advertisement advertisement : advertisements) {
+                advertisement.setPlayedDuring(null);
+                entityManager.merge(advertisement);
+            }
+            programRepository.deleteProgram(programId);
+
     }
 
 

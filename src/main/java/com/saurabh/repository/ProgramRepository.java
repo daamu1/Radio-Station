@@ -3,6 +3,7 @@ package com.saurabh.repository;
 import com.saurabh.entity.Program;
 import com.saurabh.entity.RadioJockey;
 import com.saurabh.entity.RadioStation;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -31,5 +32,7 @@ public interface ProgramRepository extends CrudRepository<Program, Long> {
 
     //All details for station for the any date
     List<Program> findByplayDateAndBroadcastedOn(LocalDate playDate, RadioStation broadcastedOn);
-
+    @Modifying
+    @Query("DELETE FROM Program j WHERE j.id = :programId ")
+    void deleteProgram( @Param("programId") Long programId);
 }

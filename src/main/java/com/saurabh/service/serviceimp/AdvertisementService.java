@@ -9,11 +9,12 @@ import com.saurabh.repository.AdvertisementRepository;
 import com.saurabh.repository.ProgramRepository;
 import com.saurabh.service.AdvertisementImplement;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class AdvertisementService implements AdvertisementImplement {
@@ -58,14 +59,13 @@ public class AdvertisementService implements AdvertisementImplement {
 
 
     @Override
+    @Transactional
+    @Modifying
     public void updateAdvertisement(Long programId, Long advertisementId, Advertisement advertisement) {
         Advertisement advertisemen = advertisementRepository.findById(advertisementId)
                 .orElseThrow(() -> new AdvertisementNotFoundException("Given Id " + advertisementId + " does not correspond to an available advertisement"));
         Program program = programRepository.findById(programId)
                 .orElseThrow(() -> new ProgramNotFoundException("Given Id " + programId + " does not correspond to an available radio program"));
-        if(!advertisemen.getPlayedDuring().equals(program)){
-            throw new RuntimeException("Advertisement with Id " + advertisementId + " does not belong to program with Id " + programId);
-        } else {
             advertisemen.setAdvertiserName(advertisement.getAdvertiserName());
             advertisemen.setCost(advertisement.getCost());
             advertisemen.setPlayedDuring(advertisement.getPlayedDuring());
@@ -74,19 +74,21 @@ public class AdvertisementService implements AdvertisementImplement {
             advertisemen.setPlayedDuring(program);
             advertisementRepository.save(advertisemen);
         }
-    }
+
 
 
     @Override
-    public void deleteAdvertisement(Long programId,Long advertisementId) {
+    @Transactional
+    @Modifying
+    public void deleteAdvertisement(Long programId, Long advertisementId) {
         Advertisement advertisemen = advertisementRepository.findById(advertisementId)
                 .orElseThrow(() -> new AdvertisementNotFoundException("Given Id " + advertisementId + " does not correspond to an available advertisement"));
         Program program = programRepository.findById(programId)
                 .orElseThrow(() -> new ProgramNotFoundException("Given Id " + programId + " does not correspond to an available radio program"));
-        if(!advertisemen.getPlayedDuring().equals(program)){
+        if (!advertisemen.getPlayedDuring().equals(program)) {
             throw new RuntimeException("Advertisement with Id " + advertisementId + " does not belong to program with Id " + programId);
-        } else{
-            advertisementRepository.deleteById(advertisementId);
+        } else {
+            advertisementRepository.deleteAdvertisement(advertisementId);
         }
     }
 

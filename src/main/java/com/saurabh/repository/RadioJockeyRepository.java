@@ -34,8 +34,8 @@ public interface RadioJockeyRepository extends CrudRepository<RadioJockey, Long>
     @Query(value = "SELECT p FROM Program p " + "JOIN p.hostedByid j " + "WHERE j.id = :jockeyId")
     List<Program> findProgramByJockeyId(@Param("jockeyId") Long jockeyId);
     @Modifying
-    @Query("DELETE FROM RadioJockey j WHERE j.id = :jockeyId AND j.worksAt.id = :stationId")
-    void deleteRadioJockey(@Param("stationId") Long stationId, @Param("jockeyId") Long jockeyId);
+    @Query("DELETE FROM RadioJockey j WHERE j.id = :jockeyId ")
+    void deleteRadioJockey( @Param("jockeyId") Long jockeyId);
 
 }
 

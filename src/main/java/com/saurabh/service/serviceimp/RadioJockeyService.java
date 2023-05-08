@@ -1,6 +1,7 @@
 package com.saurabh.service.serviceimp;
 
 import com.saurabh.dto.RadioJockeyDto;
+import com.saurabh.entity.Advertisement;
 import com.saurabh.entity.Program;
 import com.saurabh.entity.RadioJockey;
 import com.saurabh.entity.RadioStation;
@@ -11,22 +12,24 @@ import com.saurabh.repository.ProgramRepository;
 import com.saurabh.repository.RadioJockeyRepository;
 import com.saurabh.repository.RadioStationRepository;
 import com.saurabh.service.RadioJockeyImplement;
+import jakarta.persistence.EntityManager;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.logging.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 @Service
 @NoArgsConstructor
 public class RadioJockeyService implements RadioJockeyImplement {
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+    @Autowired
+    private EntityManager entityManager;
     @Autowired
     private RadioJockeyRepository radioJockeyRepository;
     @Autowired
@@ -93,17 +96,25 @@ public class RadioJockeyService implements RadioJockeyImplement {
 
     @Override
     @Transactional
+    @Modifying
     public void deleteRadioJockey(Long stationId, Long jockeyId) {
-        System.out.println("------------------>" + stationId + "--------->" + jockeyId);
         RadioStation radioStation = radioStationRepository.findById(stationId).orElseThrow(() -> new RadioStationNotFoundException("Given Id " + stationId + " does not correspond to an available radio station"));
-        System.out.println("------------------>" + radioStation.toString());
         RadioJockey radioJockey1 = radioJockeyRepository.findById(jockeyId).orElseThrow(() -> new RadioJockeyNotFoundException("Given Id " + jockeyId + " does not correspond to an available radio jockey"));
-
-        System.out.println("------------------>" + radioJockey1);
         if (!radioJockey1.getWorksAt().equals(radioStation)) {
             throw new RuntimeException("Radio jockey does not work at the given radio station");
         }
-        radioJockeyRepository.deleteById(jockeyId);
+        radioJockey1.setWorksAt(null);
+        List<Program> programs = radioJockey1.getPrograms();
+        for (Program program : programs) {
+            program.setHostedByid(null);
+            program.setBroadcastedOn(null);
+            entityManager.merge(program);
+//            entityManager.remove(program);
+//            programRepository.delete(program);
+
+        }
+        radioJockeyRepository.deleteRadioJockey(jockeyId);
+//        radioJockeyRepository.deleteById(jockeyId);
     }
 
 
