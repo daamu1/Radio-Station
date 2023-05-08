@@ -30,13 +30,13 @@ public class AdvertisementController {
     }
 
     @PutMapping("/{programId}/advertisements/{addId}")
-    public void updateAdvertisement(@PathVariable Long addId, @PathVariable Long programId, @RequestBody Advertisement advertisement) {
-        advertisementService.updateAdvertisement(addId, programId, advertisement);
+    public void updateAdvertisement( @PathVariable Long programId,@PathVariable Long addId, @RequestBody Advertisement advertisement) {
+        advertisementService.updateAdvertisement( programId,addId, advertisement);
     }
 
-    @DeleteMapping("/advertisements/{addId}")
-    public void deleteAdvertisement(@PathVariable Long addId) {
-        advertisementService.deleteAdvertisement(addId);
+    @DeleteMapping("/{programId}/advertisements/{addId}")
+    public void deleteAdvertisement(@PathVariable Long programId,@PathVariable Long addId) {
+        advertisementService.deleteAdvertisement(programId,addId);
     }
 
     //    which advertisement will be played in between of program and on which station

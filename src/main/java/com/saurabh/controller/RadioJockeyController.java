@@ -5,6 +5,7 @@ import com.saurabh.entity.Program;
 import com.saurabh.entity.RadioJockey;
 import com.saurabh.entity.RadioStation;
 import com.saurabh.service.serviceimp.RadioJockeyService;
+import lombok.Lombok;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,9 +38,9 @@ public class RadioJockeyController {
         radioJockeyService.updateRadioJockey(stationId, jockeyId, radioJockey);
     }
 
-    @DeleteMapping("/radiojockeys/{jockeyId}")
-    public void deleteRadioJockeyt(@PathVariable Long jockeyId) {
-        radioJockeyService.deleteRadioJockeyt(jockeyId);
+    @DeleteMapping("{stationId}/radiojockeys/{jockeyId}")
+    public void deleteRadioJockey(@PathVariable Long stationId ,@PathVariable Long jockeyId) {
+        radioJockeyService.deleteRadioJockey(stationId,jockeyId);
     }
 
     //Radio jockeys attached to  station.
@@ -64,8 +65,9 @@ public class RadioJockeyController {
         return radioJockeyService.findJockeysByStationId(stationId);
     }
 
-    @GetMapping("/radiojockeys/{jockeyId}/data")
-    public RadioJockey getRadioJockeyProgramStationData(@PathVariable Long jockeyId) {
-        return radioJockeyService.getRadioJockeyProgramStationData(jockeyId);
+    @GetMapping("/programs/{programId}/data")
+    Program getRadioJockeyStationData(@PathVariable  Long programId)
+ {
+        return radioJockeyService.getRadioJockeyStationData(programId);
     }
 }

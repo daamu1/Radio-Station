@@ -1,5 +1,6 @@
 package com.saurabh.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
@@ -11,12 +12,12 @@ import java.util.List;
 
 @Entity
 @Table(name = "radio_jockeys")
-@Data
+//@Data
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+//@ToString
 @JsonIgnoreProperties({"lazyProperty"})
 public class RadioJockey {
 
@@ -39,15 +40,13 @@ public class RadioJockey {
     @Column(name = "contact_email")
     private String contactEmail;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.REFRESH,
-            CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST})
-    @JoinColumn(name="station_id")
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.REFRESH, CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST})
+    @JoinColumn(name = "station_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 //    @JsonIgnore
-//    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    private  RadioStation worksAt;
+    private RadioStation worksAt;
 
-    @OneToMany(mappedBy = "hostedByid",fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
-//    @JoinColumn(name = "program_Id")
+    @OneToMany(mappedBy = "hostedByid", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JsonIgnore
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private List<Program> programs;

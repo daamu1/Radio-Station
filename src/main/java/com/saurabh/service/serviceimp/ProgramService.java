@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -41,110 +42,115 @@ public class ProgramService implements ProgrameImplement {
 
     @Override
     public ProgramDto fetchProgrambyId(Long programId) {
-        Program program = programRepository.findById(programId).get();
-        if (program == null) {
-            throw new RadioStationNotFoundException("Given Id " + programId + " does not correspond to an available radio program");
-        } else {
+        try {
+            Program program = programRepository.findById(programId).get();
             ProgramDto programDto = new ProgramDto(program);
             return programDto;
+        } catch (NoSuchElementException ex) {
+            throw new RadioStationNotFoundException("Given Id " + programId + " does not correspond to an available radio program");
         }
     }
 
+
     @Override
     public void addNewProgramOnJockey(Long stationId, Long jockeyId, Program program) {
-        RadioStation radioStation = radioStationRepository.findById(stationId).get();
-        RadioJockey radioJockey = radioJockeyRepository.findById(jockeyId).get();
-        if (radioStation == null) {
-            throw new RadioStationNotFoundException("Given Id " + stationId + " does not correspond to an available radio station");
-        } else if (radioJockey == null) {
-            throw new RadioJockeyNotFoundException("Given Id " + jockeyId + " does not correspond to an available radio  jockey");
-        } else if (radioJockey.getWorksAt().equals(radioStation)) {
-            program.setHostedByid(radioJockey);
-            program.setBroadcastedOn(radioStation);
-            programRepository.save(program);
+        RadioStation radioStation = radioStationRepository.findById(stationId).orElseThrow(() -> new RadioStationNotFoundException("Given Id " + stationId + " does not correspond to an available radio station"));
+        RadioJockey radioJockey = radioJockeyRepository.findById(jockeyId).orElseThrow(() -> new RadioJockeyNotFoundException("Given Id " + jockeyId + " does not correspond to an available radio jockey"));
+        if (!radioJockey.getWorksAt().equals(radioStation)) {
+            throw new RuntimeException("The radio jockey with ID " + jockeyId + " does not work at the radio station with ID " + stationId);
         }
+        program.setHostedByid(radioJockey);
+        program.setBroadcastedOn(radioStation);
+        programRepository.save(program);
     }
 
 
     @Override
     public void updateProgram(Long stationId, Long jockeyId, Long programId, Program programe) {
-        Program program = programRepository.findById(programId).get();
-        RadioStation radioStation = radioStationRepository.findById(stationId).get();
-        RadioJockey radioJockey = radioJockeyRepository.findById(jockeyId).get();
-        if (radioStation == null) {
-            throw new RadioStationNotFoundException("Given Id " + stationId + " does not correspond to an available radio station");
-        } else if (radioJockey == null) {
-            throw new RadioJockeyNotFoundException("Given Id " + jockeyId + " does not correspond to an available radio  jockey");
-        } else if (program == null) {
-            throw new ProgramNotFoundException("Given Id " + programId + " does not correspond to an available radio program");
-        } else if (radioJockey.getWorksAt().equals(radioStation)) {
-            program.setId(programId);
-            program.setName(programe.getName());
-            program.setBroadcastedOn(programe.getBroadcastedOn());
-            program.setAdvertisements(programe.getAdvertisements());
-            program.setDuration(programe.getDuration());
-            program.setCategory(programe.getCategory());
-            program.setEndTime(programe.getEndTime());
-            program.setStartTime(programe.getStartTime());
-            program.setHostedByid(programe.getHostedByid());
-            program.setBroadcastedOn(radioStation);
-            program.setHostedByid(radioJockey);
-            programRepository.save(program);
+        Program program = programRepository.findById(programId).orElseThrow(() -> new ProgramNotFoundException("Given Id " + programId + " does not correspond to an available radio program"));
+        RadioStation radioStation = radioStationRepository.findById(stationId).orElseThrow(() -> new RadioStationNotFoundException("Given Id " + stationId + " does not correspond to an available radio station"));
+        RadioJockey radioJockey = radioJockeyRepository.findById(jockeyId).orElseThrow(() -> new RadioJockeyNotFoundException("Given Id " + jockeyId + " does not correspond to an available radio jockey"));
+        if (!radioJockey.getWorksAt().equals(radioStation)) {
+            throw new RuntimeException("Radio jockey with Id " + jockeyId + " does not work at radio station with Id " + stationId);
         }
+        program.setId(programId);
+        program.setName(programe.getName());
+        program.setBroadcastedOn(programe.getBroadcastedOn());
+        program.setAdvertisements(programe.getAdvertisements());
+        program.setDuration(programe.getDuration());
+        program.setPlayDate(programe.getPlayDate());
+        program.setCategory(programe.getCategory());
+        program.setEndTime(programe.getEndTime());
+        program.setStartTime(programe.getStartTime());
+        program.setHostedByid(programe.getHostedByid());
+        program.setBroadcastedOn(radioStation);
+        program.setHostedByid(radioJockey);
+        programRepository.save(program);
     }
 
     @Override
-    public void deleteProgram(Long programId) {
-        Program program = programRepository.findById(programId).get();
-        if (program == null) {
-            throw new ProgramNotFoundException("Given Id " + programId + " does not correspond to an available radio program");
-        } else {
+    public void deleteProgram(Long stationId, Long jockeyId, Long programId) {
+        Program program = programRepository.findById(programId).orElseThrow(() -> new ProgramNotFoundException("Given Id " + programId + " does not correspond to an available radio program"));
+        RadioStation radioStation = radioStationRepository.findById(stationId).orElseThrow(() -> new RadioStationNotFoundException("Given Id " + stationId + " does not correspond to an available radio station"));
+        RadioJockey radioJockey = radioJockeyRepository.findById(jockeyId).orElseThrow(() -> new RadioJockeyNotFoundException("Given Id " + jockeyId + " does not correspond to an available radio jockey"));
+        if (!radioJockey.getWorksAt().equals(radioStation)) {
+            throw new RuntimeException("Radio jockey with Id " + jockeyId + " does not work at radio station with Id " + stationId);
+        }
+        try {
             programRepository.delete(program);
+        } catch (ProgramNotFoundException e) {
+            throw new ProgramNotFoundException("Given Id " + programId + " does not correspond to an available radio program");
+        } catch (Exception e) {
+            throw new RuntimeException("An error occurred while deleting the program", e);
         }
     }
+
 
     //Radio jockey attached to Program.
     @Override
     public List<RadioJockey> fetchAllJockey(Long programId) {
-        Program program = programRepository.findById(programId).get();
-        if (program == null) {
-            throw new ProgramNotFoundException("Given Id " + programId + " does not correspond to an available radio program");
-        } else {
-            return programRepository.findJockeysByProgramId(programId);
-        }
+        Program program = programRepository.findById(programId).orElseThrow(() -> new ProgramNotFoundException("Given Id " + programId + " does not correspond to an available radio program"));
+        return programRepository.findJockeysByProgramId(programId);
     }
-//program played on particulat staion on perticular date
+
+    //program played on particulat staion on perticular date
     @Override
     public List<Program> findProgramByStationAndDate(Long stationId, LocalDate playDate) {
-        RadioStation radioStation = radioStationRepository.findById(stationId).get();
-        if (radioStation == null) {
+        Optional<RadioStation> radioStation = radioStationRepository.findById(stationId);
+        if (!radioStation.isPresent()) {
             throw new RadioStationNotFoundException("Given Id " + stationId + " does not correspond to an available radio station");
         } else {
             return programRepository.findProgramsByStationIdAndDate(stationId, playDate);
         }
     }
-//which Radio Jockey will play program on which station and when details
 
+    //which Radio Jockey will play program on which station and when details
     @Override
     public Optional<Program> findRadioJockeyAndStationByProgramId(Long programId) {
-        Program program = programRepository.findById(programId).get();
+        Optional<Program> programOptional = programRepository.findById(programId);
 
-        if (program == null) {
+        if (programOptional.isEmpty()) {
             throw new ProgramNotFoundException("Given Id " + programId + " does not correspond to an available radio program");
         } else {
-            return programRepository.findById(programId);
+            return programOptional;
         }
     }
-//make filters for getting data on behalf of date, stationId, programId
+
+    //make filters for getting data on behalf of date, stationId, programId
     @Override
     public List<Program> findProgramsByStationIdAndDateAndproductId(Long stationId, LocalDate playDate, Long programId) {
-        RadioStation radioStation = radioStationRepository.findById(stationId).get();
-        Program program = programRepository.findById(programId).get();
-        if (radioStation == null && program == null) {
-            throw new RadioStationNotFoundException("Given Id " + programId + " does not correspond to an available radio program");
-        } else {
-            return programRepository.findProgramsByStationIdAndDateAndproductId(stationId, playDate, programId);
+        Optional<RadioStation> radioStation = radioStationRepository.findById(stationId);
+        Optional<Program> program = programRepository.findById(programId);
+
+        if (!radioStation.isPresent()) {
+            throw new RadioStationNotFoundException("Given Id " + stationId + " does not correspond to an available radio station");
         }
 
+        if (!program.isPresent()) {
+            throw new ProgramNotFoundException("Given Id " + programId + " does not correspond to an available radio program");
+        }
+
+        return programRepository.findProgramsByStationIdAndDateAndproductId(stationId, playDate, programId);
     }
+
 }

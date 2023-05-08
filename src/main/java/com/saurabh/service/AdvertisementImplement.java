@@ -16,5 +16,5 @@ public interface AdvertisementImplement {
 
     public void updateAdvertisement(Long programId,Long advertisementId,Advertisement advertisement);
 
-    public void deleteAdvertisement(Long advertisementId);
+    public void deleteAdvertisement(Long programId,Long advertisementId);
 }

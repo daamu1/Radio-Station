@@ -18,7 +18,7 @@ public interface ProgrameImplement {
 
     public void updateProgram(Long stationId,Long programId,Long jockeyId , Program programe) ;
 
-    public void deleteProgram(Long programId);
+    public void deleteProgram(Long stationId,Long jockeyId,Long programId);
 
     public List<RadioJockey> fetchAllJockey(Long programId);
 

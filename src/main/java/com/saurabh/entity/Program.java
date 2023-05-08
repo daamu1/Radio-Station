@@ -44,22 +44,17 @@ public class Program {
     private String category;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
-    @JoinColumn(name = "radio_station_id")
+    @JoinColumn(name = "radio_station_id",nullable = true)
     @JsonIgnore
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private RadioStation broadcastedOn;
 
-    @ManyToOne( fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
-//    @JsonIgnore
-//    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-   @JoinColumn(name="jockey_id")
+    @ManyToOne( fetch = FetchType.EAGER,cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
+   @JoinColumn(name="jockey_id",nullable = true)
     private RadioJockey hostedByid;
-    @OneToMany(mappedBy = "playedDuring", fetch = FetchType.EAGER, cascade = {CascadeType.REFRESH,
-            CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST})
+    @OneToMany(mappedBy = "playedDuring", fetch = FetchType.EAGER,cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Advertisement> advertisements;
-
-
 
 
     public void addAdd(Advertisement advertisement) {

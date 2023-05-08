@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AdvertisementService implements AdvertisementImplement {
@@ -34,66 +35,59 @@ public class AdvertisementService implements AdvertisementImplement {
 
     @Override
     public AdvertisementDto fetchAdvertisementbyId(Long advertisementId) {
-        Advertisement advertisement = advertisementRepository.findById(advertisementId).get();
-        AdvertisementDto advertisementDto = new AdvertisementDto(advertisement);
-        if (advertisement == null) {
-            throw new AdvertisementNotFoundException("Given Id " + advertisementId + " does not correspond to an available radio program");
-        }
-        return advertisementDto;
+        Advertisement advertisement = advertisementRepository.findById(advertisementId)
+                .orElseThrow(() -> new AdvertisementNotFoundException("Given Id " + advertisementId + " does not correspond to an available radio advertisement"));
+        return new AdvertisementDto(advertisement);
     }
+
 
     //which advertisement will be played in between of program and on which station
     @Override
     public Advertisement fetchAdvertisementAllDetailsbyId(Long advertisementId) {
-        Advertisement advertisement = advertisementRepository.findById(advertisementId).get();
-        if (advertisement == null) {
-            throw new AdvertisementNotFoundException("Given Id " + advertisementId + " does not correspond to an available radio program");
-        }
+        Advertisement advertisement = advertisementRepository.findById(advertisementId)
+                .orElseThrow(() -> new AdvertisementNotFoundException("Given Id " + advertisementId + " does not correspond to an available advertisement"));
         return advertisement;
     }
 
     @Override
     public void addNewAdvertisement(Long programId, Advertisement advertisement) {
-        Program program = programRepository.findById(programId).get();
-        if (program == null) {
-            throw new ProgramNotFoundException("Given Id " + programId + " does not correspond to an available radio program");
-        } else {
-            //program.setAdvertisements((List<Advertisement>) advertisement);
-            program.addAdd(advertisement);
-            programRepository.save(program);
-        }
+        Program program = programRepository.findById(programId).orElseThrow(() -> new ProgramNotFoundException("Given Id " + programId + " does not correspond to an available radio program"));
+        program.addAdd(advertisement);
+        programRepository.save(program);
     }
+
 
     @Override
     public void updateAdvertisement(Long programId, Long advertisementId, Advertisement advertisement) {
-        Advertisement advertisemen = advertisementRepository.findById(advertisementId).get();
-        Program program = programRepository.findById(programId).get();
-        if (advertisemen == null) {
-            throw new AdvertisementNotFoundException("Given Id " + advertisementId + " does not correspond to an available radio program");
-        } else if (program == null) {
-            throw new ProgramNotFoundException("Given Id " + programId + " does not correspond to an available radio program");
-        } else if(advertisemen.getPlayedDuring().equals(program)){
+        Advertisement advertisemen = advertisementRepository.findById(advertisementId)
+                .orElseThrow(() -> new AdvertisementNotFoundException("Given Id " + advertisementId + " does not correspond to an available advertisement"));
+        Program program = programRepository.findById(programId)
+                .orElseThrow(() -> new ProgramNotFoundException("Given Id " + programId + " does not correspond to an available radio program"));
+        if(!advertisemen.getPlayedDuring().equals(program)){
+            throw new RuntimeException("Advertisement with Id " + advertisementId + " does not belong to program with Id " + programId);
+        } else {
             advertisemen.setAdvertiserName(advertisement.getAdvertiserName());
             advertisemen.setCost(advertisement.getCost());
             advertisemen.setPlayedDuring(advertisement.getPlayedDuring());
             advertisemen.setAddType(advertisement.getAddType());
             advertisemen.setAddDuration(advertisement.getAddDuration());
-//            advertisemen.setgetPlayedDuring(advertisemen.getPlayedDuring());
-//            advertisemen.setPlayedDuring(advertisemen.getPlayedDuring());
             advertisemen.setPlayedDuring(program);
             advertisementRepository.save(advertisemen);
         }
-        else {
-            throw  new RuntimeException(" Something went wrong ");
+    }
+
+
+    @Override
+    public void deleteAdvertisement(Long programId,Long advertisementId) {
+        Advertisement advertisemen = advertisementRepository.findById(advertisementId)
+                .orElseThrow(() -> new AdvertisementNotFoundException("Given Id " + advertisementId + " does not correspond to an available advertisement"));
+        Program program = programRepository.findById(programId)
+                .orElseThrow(() -> new ProgramNotFoundException("Given Id " + programId + " does not correspond to an available radio program"));
+        if(!advertisemen.getPlayedDuring().equals(program)){
+            throw new RuntimeException("Advertisement with Id " + advertisementId + " does not belong to program with Id " + programId);
+        } else{
+            advertisementRepository.deleteById(advertisementId);
         }
     }
 
-    @Override
-    public void deleteAdvertisement(Long advertisementId) {
-        Advertisement advertisement = advertisementRepository.findById(advertisementId).get();
-        if (advertisement == null) {
-            throw new AdvertisementNotFoundException("Given Id " + advertisementId + " does not correspond to an available radio program");
-        }
-        advertisementRepository.deleteById(advertisementId);
-    }
 }

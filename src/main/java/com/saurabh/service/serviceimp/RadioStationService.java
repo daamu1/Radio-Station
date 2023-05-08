@@ -9,6 +9,7 @@ import com.saurabh.repository.RadioStationRepository;
 import com.saurabh.service.RadioStationImplement;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,13 +42,11 @@ public class RadioStationService implements RadioStationImplement {
 
     @Override
     public RadioStationDto fetchRadioStationbyId(Long stationId) {
-        RadioStation radioStation = radioStationRepository.findById(stationId).get();
-        RadioStationDto dto = new RadioStationDto(radioStation);
-        if (radioStation == null) {
-            throw new RadioStationNotFoundException("Given Id " + stationId + " does not correspond to an available radio station");
-        }
-        return dto;
+        RadioStation radioStation = radioStationRepository.findById(stationId)
+                .orElseThrow(() -> new RadioStationNotFoundException("Radio station with ID " + stationId + " not found"));
+        return new RadioStationDto(radioStation);
     }
+
 
     @Override
     public void addNewRadioStation(RadioStation radioStation) {
@@ -55,35 +54,35 @@ public class RadioStationService implements RadioStationImplement {
     }
 
     @Override
-    @Transactional
     public void updateRadioStation(Long stationId, RadioStation radioStatio) {
-        RadioStation radioStation = radioStationRepository.findById(stationId).get();
-        if (radioStation == null) {
-            throw new RadioStationNotFoundException("Given Id " + stationId + " does not correspond to an available radio station");
-        } else {
+        RadioStation radioStation = radioStationRepository.findById(stationId)
+                .orElseThrow(() -> new RadioStationNotFoundException("Radio station with ID " + stationId + " not found"));
+        if (radioStation != null)
             radioStation.setName(radioStatio.getName());
-            radioStation.setCity(radioStatio.getCity());
-            radioStation.setGenre(radioStatio.getGenre());
-            radioStation.setFrequency(radioStatio.getFrequency());
-            radioStation.setContactEmail(radioStatio.getContactEmail());
-            radioStation.setContactPhone(radioStatio.getContactPhone());
-            radioStation.setWebsite(radioStatio.getWebsite());
-            radioStation.setPrograms(radioStatio.getPrograms());
-            radioStationRepository.save(radioStation);
-        }
+        radioStation.setCity(radioStatio.getCity());
+        radioStation.setGenre(radioStatio.getGenre());
+        radioStation.setFrequency(radioStatio.getFrequency());
+        radioStation.setContactEmail(radioStatio.getContactEmail());
+        radioStation.setContactPhone(radioStatio.getContactPhone());
+        radioStation.setWebsite(radioStatio.getWebsite());
+        radioStation.setPrograms(radioStatio.getPrograms());
+        radioStationRepository.save(radioStation);
 
     }
+
 
     @Override
     @Transactional
     public void deleteRadioStation(Long stationId) {
-        RadioStation radioStation = radioStationRepository.findById(stationId).get();
-        if (radioStation == null) {
-            throw new RadioStationNotFoundException("Given Id " + stationId + " does not correspond to an available radio station");
-        } else {
+        try {
+            RadioStation radioStation = radioStationRepository.findById(stationId)
+                    .orElseThrow(() -> new RadioStationNotFoundException("Given Id " + stationId + " does not correspond to an available radio station"));
             radioStationRepository.delete(radioStation);
+        } catch (DataAccessException ex) {
+            throw new RuntimeException("An error occurred while deleting the radio station", ex);
         }
     }
+
 
     public List<Object[]> findAllDetailsForStation(Long stationId) {
         RadioStation radioStation = radioStationRepository.findById(stationId).get();
@@ -107,10 +106,8 @@ public class RadioStationService implements RadioStationImplement {
     //All details for station for the any date
     @Override
     public List<Program> getStationDetails(Long stationId, LocalDate date) {
-        RadioStation radioStation = radioStationRepository.findById(stationId).get();
-        if (radioStation == null) {
-            throw new RadioStationNotFoundException("Given Id " + stationId + " does not correspond to an available radio station");
-        }
+        RadioStation radioStation = radioStationRepository.findById(stationId)
+                .orElseThrow(() -> new RadioStationNotFoundException("Given Id " + stationId + " does not correspond to an available radio station"));
         return programRepository.findByplayDateAndBroadcastedOn(date, radioStation);
     }
 

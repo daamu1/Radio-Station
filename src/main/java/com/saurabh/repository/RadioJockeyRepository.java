@@ -4,6 +4,7 @@ package com.saurabh.repository;
 import com.saurabh.entity.Program;
 import com.saurabh.entity.RadioJockey;
 import com.saurabh.entity.RadioStation;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -32,7 +33,9 @@ public interface RadioJockeyRepository extends CrudRepository<RadioJockey, Long>
     //   Program attached to Radio jockeys
     @Query(value = "SELECT p FROM Program p " + "JOIN p.hostedByid j " + "WHERE j.id = :jockeyId")
     List<Program> findProgramByJockeyId(@Param("jockeyId") Long jockeyId);
-
+    @Modifying
+    @Query("DELETE FROM RadioJockey j WHERE j.id = :jockeyId AND j.worksAt.id = :stationId")
+    void deleteRadioJockey(@Param("stationId") Long stationId, @Param("jockeyId") Long jockeyId);
 
 }
 

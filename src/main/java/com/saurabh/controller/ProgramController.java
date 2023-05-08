@@ -40,9 +40,9 @@ public class ProgramController {
         programService.updateProgram(stationId, jockeyId, programId, program);
     }
 
-    @DeleteMapping("/programs/{programId}")
-    public void deleteProgram(@PathVariable Long programId) {
-        programService.deleteProgram(programId);
+    @DeleteMapping("{stationId}/jockeys/{jockeyId}/programs/{programId}")
+    public void deleteProgram(@PathVariable Long stationId, @PathVariable Long programId, @PathVariable Long jockeyId) {
+        programService.deleteProgram(stationId, jockeyId, programId);
     }
 
     //Radio jockeys attached to Program.

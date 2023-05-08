@@ -2,22 +2,21 @@ package com.saurabh.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.web.servlet.tags.Param;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "radio_stations")
-@Data
+//@Data
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+//@ToString
 @JsonIgnoreProperties({"lazyProperty"})
 public class RadioStation {
 
@@ -46,12 +45,10 @@ public class RadioStation {
     @Column(name = "genre")
     private String genre;
 
-    @OneToMany(mappedBy = "broadcastedOn", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
+    @OneToMany(mappedBy = "broadcastedOn", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JsonIgnore
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private List<Program> programs;
-    @OneToMany(mappedBy = "worksAt",fetch = FetchType.EAGER,cascade = {CascadeType.REFRESH,
-            CascadeType.DETACH,CascadeType.MERGE,CascadeType.PERSIST})
+    @OneToMany(mappedBy = "worksAt", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @JsonIgnore
     private List<RadioJockey> radioJockeys;
@@ -61,8 +58,9 @@ public class RadioStation {
             programs = new ArrayList<Program>();
         }
         programs.add(program);
-       program.setBroadcastedOn(this);
+        program.setBroadcastedOn(this);
     }
+
     public void addRadioJockey(RadioJockey program) {
         if (programs == null) {
             radioJockeys = new ArrayList<RadioJockey>();
