@@ -30,13 +30,13 @@ public class AdvertisementController {
     }
 
     @PutMapping("/{programId}/advertisements/{addId}")
-    public void updateAdvertisement( @PathVariable Long programId,@PathVariable Long addId, @RequestBody Advertisement advertisement) {
-        advertisementService.updateAdvertisement( programId,addId, advertisement);
+    public void updateAdvertisement(@PathVariable Long programId, @PathVariable Long addId, @RequestBody Advertisement advertisement) {
+        advertisementService.updateAdvertisement(programId, addId, advertisement);
     }
 
     @DeleteMapping("/{programId}/advertisements/{addId}")
-    public void deleteAdvertisement(@PathVariable Long programId,@PathVariable Long addId) {
-        advertisementService.deleteAdvertisement(programId,addId);
+    public void deleteAdvertisement(@PathVariable Long programId, @PathVariable Long addId) {
+        advertisementService.deleteAdvertisement(programId, addId);
     }
 
     //    which advertisement will be played in between of program and on which station
@@ -44,4 +44,10 @@ public class AdvertisementController {
     public Advertisement fetchAdvertisementAllDetailsbyId(@PathVariable Long advertisementId) {
         return advertisementService.fetchAdvertisementAllDetailsbyId(advertisementId);
     }
+
+    @GetMapping("/advertisements/detailsBasedOnName")
+    List<Advertisement> listOfAdvertisementBasedOnListOfIds(@RequestParam String addType, @RequestParam String advertiserName) {
+        return advertisementService.listOfAdvertisementBasedOnListOfIds(addType, advertiserName);
+    }
+
 }

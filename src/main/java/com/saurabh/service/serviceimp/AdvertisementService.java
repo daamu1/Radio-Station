@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,6 +91,12 @@ public class AdvertisementService implements AdvertisementImplement {
         } else {
             advertisementRepository.deleteAdvertisement(advertisementId);
         }
+    }
+
+    @Override
+    public List<Advertisement> listOfAdvertisementBasedOnListOfIds( String addtype, String advertiserName) {
+
+        return advertisementRepository.findByAddTypeAndAdvertiserName(addtype,advertiserName);
     }
 
 }

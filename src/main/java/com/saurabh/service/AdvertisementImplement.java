@@ -17,4 +17,6 @@ public interface AdvertisementImplement {
     public void updateAdvertisement(Long programId,Long advertisementId,Advertisement advertisement);
 
     public void deleteAdvertisement(Long programId,Long advertisementId);
+
+    public List<Advertisement> listOfAdvertisementBasedOnListOfIds(String add_type,String advertiserName);
 }
